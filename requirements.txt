@@ -35,7 +35,6 @@ MarkupSafe==0.23
 more-itertools==8.2.0
 numpy==1.18.2
 oauthlib==3.1.0
-onboard==1.2.0
 opt-einsum==3.1.0
 packaging==20.3
 padme==1.1.1
