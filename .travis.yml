@@ -12,7 +12,8 @@ install:
   - pip install pkginfo
   - pip install cleo
   - pip install jsonschema
-  - pip install CacheControl 
+  - pip install CacheControl
+  - pip install cachy 
 
 script: 
   - pytest tests/mixology
