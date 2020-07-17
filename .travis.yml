@@ -9,7 +9,8 @@ install:
   - pip install httpretty
   - pip install tomlkit
   - pip install clikit
-  - pip install pkginfo 
+  - pip install pkginfo
+  - pip install cleo 
 
 script: 
   - pytest tests/mixology
