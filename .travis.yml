@@ -11,7 +11,8 @@ install:
   - pip install clikit
   - pip install pkginfo
   - pip install cleo
-  - pip install jsonschema 
+  - pip install jsonschema
+  - pip install CacheControl 
 
 script: 
   - pytest tests/mixology
