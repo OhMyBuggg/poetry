@@ -74,7 +74,6 @@ tensorflow-estimator==2.1.0
 termcolor==1.1.0
 tomlkit==0.6.0
 typing-extensions==3.7.4.2
-unity-scope-chromiumbookmarks==0.1
 unity-scope-colourlovers==0.1
 unity-scope-devhelp==0.1
 unity-scope-firefoxbookmarks==0.1
