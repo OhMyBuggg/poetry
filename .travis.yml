@@ -6,14 +6,7 @@ python:
   - "3.8"
 
 install:
-  - pip install httpretty
-  - pip install tomlkit
-  - pip install clikit
-  - pip install pkginfo
-  - pip install cleo
-  - pip install jsonschema
-  - pip install CacheControl
-  - pip install cachy 
+  - pip install -r requirements.txt
 
 script: 
   - pytest tests/mixology
