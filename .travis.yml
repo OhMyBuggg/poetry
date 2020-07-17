@@ -5,5 +5,11 @@ cache: pip
 python:
   - "3.8"
 
+install:
+  - pip install httpretty
+  - pip install tomlkit
+  - pip install clikit
+  - pip install pkginfo 
+
 script: 
   - pytest tests/mixology
