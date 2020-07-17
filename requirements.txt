@@ -74,7 +74,6 @@ tensorflow-estimator==2.1.0
 termcolor==1.1.0
 tomlkit==0.6.0
 typing-extensions==3.7.4.2
-ubuntu-drivers-common==0.0.0
 ufw==0.35
 unattended-upgrades==0.1
 unity-scope-calculator==0.1
