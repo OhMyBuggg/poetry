@@ -69,3 +69,17 @@ def test_circular_dependency(root, provider, repo):
     add_to_repo(repo, "bar", "1.0.0", deps={"foo": "1.0.0"})
 
     check_solver_result(root, provider, {"foo": "1.0.0", "bar": "1.0.0"})
+
+def test_empty(root, provider, repo):
+    add_to_repo(repo, "a", "1.0.0", deps={"aa": "1.0.0", "ab": "1.0.0"})
+    add_to_repo(repo, "b", "1.0.0", deps={"ba": "1.0.0", "bb": "1.0.0"})
+    add_to_repo(repo, "aa", "1.0.0")
+    add_to_repo(repo, "ab", "1.0.0")
+    add_to_repo(repo, "ba", "1.0.0")
+    add_to_repo(repo, "bb", "1.0.0")
+
+    check_solver_result(
+        root,
+        provider,
+        {},
+    )
