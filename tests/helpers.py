@@ -1,90 +1,50 @@
-import os
-import shutil
-
-from poetry.packages import Dependency
-from poetry.packages import Package
-from poetry.utils._compat import PY2
-from poetry.utils._compat import WINDOWS
-from poetry.utils._compat import Path
-from poetry.utils._compat import urlparse
-from poetry.vcs.git import ParsedUrl
-
-
-FIXTURE_PATH = Path(__file__).parent / "fixtures"
-
+from poetry.core.packages import Package
+from poetry.mixology.failure import SolveFailure
+from poetry.mixology.version_solver import VersionSolver
+from poetry.packages import DependencyPackage
 
 def get_package(name, version):
     return Package(name, version)
 
 
-def get_dependency(
-    name, constraint=None, category="main", optional=False, allows_prereleases=False
+def add_to_repo(repository, name, version, deps=None, python=None):
+    package = Package(name, version)
+    if python:
+        package.python_versions = python
+
+    if deps:
+        for dep_name, dep_constraint in deps.items():
+            package.add_dependency(dep_name, dep_constraint)
+
+    repository.add_package(package)
+
+
+def check_solver_result(
+    root, provider, result=None, error=None, tries=None, locked=None, use_latest=None
 ):
-    return Dependency(
-        name,
-        constraint or "*",
-        category=category,
-        optional=optional,
-        allows_prereleases=allows_prereleases,
-    )
+    if locked is not None:
+        locked = {k: DependencyPackage(l.to_dependency(), l) for k, l in locked.items()}
 
+    solver = VersionSolver(root, provider, locked=locked, use_latest=use_latest)
 
-def fixture(path=None):
-    if path:
-        return FIXTURE_PATH / path
-    else:
-        return FIXTURE_PATH
+    try:
+        solution = solver.solve()
+    except SolveFailure as e:
+        if error:
+            assert str(e) == error
 
+            if tries is not None:
+                assert solver.solution.attempted_solutions == tries
 
-def copy_or_symlink(source, dest):
-    if dest.exists():
-        if dest.is_symlink():
-            os.unlink(str(dest))
-        elif dest.is_dir():
-            shutil.rmtree(str(dest))
-        else:
-            os.unlink(str(dest))
+            return
 
-    # Python2 does not support os.symlink on Windows whereas Python3 does.
-    # os.symlink requires either administrative privileges or developer mode on Win10,
-    # throwing an OSError if neither is active.
-    if WINDOWS:
-        if PY2:
-            if source.is_dir():
-                shutil.copytree(str(source), str(dest))
-            else:
-                shutil.copyfile(str(source), str(dest))
-        else:
-            try:
-                os.symlink(str(source), str(dest), target_is_directory=source.is_dir())
-            except OSError:
-                if source.is_dir():
-                    shutil.copytree(str(source), str(dest))
-                else:
-                    shutil.copyfile(str(source), str(dest))
-    else:
-        os.symlink(str(source), str(dest))
+        raise
 
+    packages = {}
+    for package in solution.packages:
+        packages[package.name] = str(package.version)
 
-def mock_clone(_, source, dest):
-    # Checking source to determine which folder we need to copy
-    parsed = ParsedUrl.parse(source)
+    assert result == packages
 
-    folder = (
-        Path(__file__).parent
-        / "fixtures"
-        / "git"
-        / parsed.resource
-        / parsed.pathname.lstrip("/").rstrip(".git")
-    )
-
-    copy_or_symlink(folder, dest)
-
-
-def mock_download(self, url, dest):
-    parts = urlparse.urlparse(url)
-
-    fixtures = Path(__file__).parent / "fixtures"
-    fixture = fixtures / parts.path.lstrip("/")
-
-    copy_or_symlink(fixture, dest)
+    if tries is not None:
+        assert solution.attempted_solutions == tries
