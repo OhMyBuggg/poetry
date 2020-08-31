@@ -23,6 +23,8 @@ class PartialSolution:
     def __init__(self):
         # The assignments that have been made so far, in the order they were
         # assigned.
+        # basically assignment doesn't be used to computed, it just like to record the order
+        # compute use positive and negative
         self._assignments = []  # type: List[Assignment]
 
         # The decisions made for each package.

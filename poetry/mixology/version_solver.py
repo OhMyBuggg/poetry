@@ -326,6 +326,7 @@ class VersionSolver:
 
         raise SolveFailure(incompatibility)
 
+    # return the package which was been select
     def _choose_package_version(self):  # type: () -> Union[str, None]
         """
         Tries to select a version of a required package.
@@ -405,7 +406,7 @@ class VersionSolver:
             self._add_incompatibility(
                 Incompatibility([Term(dependency, True)], NoVersionsCause())
             )
-
+            self._print_imcompatibilities()
             return dependency.name
 
         version = self._provider.complete_package(version)
@@ -435,7 +436,9 @@ class VersionSolver:
             self._log(
                 "selecting {} ({})".format(version.name, version.full_pretty_version)
             )
-
+        #self._print_imcompatibilities()
+        #self._print_partial_solution()
+        self._print_derivation()
         return dependency.name
 
     def _excludes_single_version(self, constraint):  # type: (Any) -> bool
@@ -452,7 +455,7 @@ class VersionSolver:
             [p for p in decisions if not p.is_root()],
             self._solution.attempted_solutions,
         )
-
+    # same incompatibility will exist more than one time if its term is more than one
     def _add_incompatibility(self, incompatibility):  # type: (Incompatibility) -> None
         self._log("fact: {}".format(incompatibility))
 
@@ -487,3 +490,42 @@ class VersionSolver:
 
     def _log(self, text):
         self._provider.debug(text, self._solution.attempted_solutions)
+
+    def _print_imcompatibilities(self):
+        for key in self._incompatibilities:
+            print(key)
+            for incompatibility in self._incompatibilities[key]:
+                print( incompatibility )
+            #print()
+
+    def _print_decisions(self):
+        decisions = self._solution.decisions
+        for decision in decisions:
+            print(decision)
+
+    def _print_derivation(self):
+        # print("positive")
+        # for positive in self._solution._positive:
+        #     print(self._solution._positive[positive])
+        print("nagative")
+        for key in self._solution._negative:
+            for negative in self._solution._negative[key]:
+                print(self._solution._nagative[key][negative])
+
+    # init do until root requirement has been propagate
+    def _init(self):
+        root_dependency = Dependency(self._root.name, self._root.version)
+        root_dependency.is_root = True
+
+        self._add_incompatibility(
+            Incompatibility([Term(root_dependency, False)], RootCause())
+        )
+        next = self._root.name
+        self._propagate(next)
+
+    def _clear(self):
+        self._incompatibilities = {}
+        self._solution = PartialSolution()
+        self.solve()
+            
+        
